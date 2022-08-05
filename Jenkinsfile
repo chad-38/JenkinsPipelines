@@ -1,39 +1,27 @@
 pipeline {
-    agent any
+   agent any
     environment {
-        RELEASE='21.04'
+      RELEASE='21.04'
     }
-    stages {
-        stage('Build') {
-            agent any
+   stages {
+      stage('Build') {
             environment {
-                LOG_LEVEL='INFO'
+               LOG_LEVEL='INFO'
             }
             steps {
-                echo "Building release ${RELEASE} with log level ${LOG_LEVEL}..."
+               echo "Building release ${RELEASE} with log level ${LOG_LEVEL}..."
             }
         }
         stage('Test') {
             steps {
-                echo "Testing release ${RELEASE}..."
+               echo "Testing release ${RELEASE}"
+               writeFile file: 'test-results.txt', text: 'passed'               
             }
         }
-        stage('Deploy') {
-            input {
-                message 'Deploy?'
-                ok 'Do it!'
-                parameters {
-                    string(name: 'TARGET_ENVIRONMENT', defaultValue: 'PROD', description: 'Target deployment environment')
-                }
-            }
-            steps {
-                echo "Deploying release ${RELEASE} to environment ${TARGET_ENVIRONMENT}"
-            }
-        }        
-    }
-    post{
-        always {
-             echo 'Prints whether deploy happened or not, success or failure'
-        }
-    }
+   }
+   post {
+      success {
+         archiveArtifacts 'test-results.txt'
+      }
+   }
 }
